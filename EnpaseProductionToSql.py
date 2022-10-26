@@ -3,13 +3,18 @@ import json
 import socket
 import datetime
 import time
+import configparser
 import mysql.connector
 from mysql.connector import Error
 
 socket.setdefaulttimeout(30)
 
-#put your Envoy IP below
-url = 'http://[ENVOY IP ADRESS]/production.json'
+#connect to config file to collect IP, SQL server and login data later
+config=configparser.ConfigParser()
+config.read('config.ini')
+
+#construct target URL
+url = 'http://' + config.get('ENVOY', 'IP')+'/production.json'
 
 #connect to Envoy and collect data
 try:
@@ -28,31 +33,27 @@ except socket.timeout:
         
         response.close
 
-
-
 #connect to Mysql and put data in
 try:
-#put database info below
-    connection = mysql.connector.connect(host='localhost',
-                                         database='[DATABASE NAME]',
-                                         user='[DATABASE USERNAME]',
-                                         password='[DATABASE PASSWORD]')
-                                         
-   #I should clean the below up, so there is only one place to change variables for others that want to use the script. Production is the tablename used by me.                                      
+    connection = mysql.connector.connect(host = config.get('SERVER', 'host'),
+                                         database=config.get('SERVER', 'database'),
+                                         user=config.get('LOGIN', 'user'),
+                                         password=config.get('LOGIN', 'password'))
     if connection.is_connected():
         db_Info = connection.get_server_info()
-        print("Connected to MySQL Server version ", db_Info)
+#        print("Connected to MySQL Server version ", db_Info)
         cursor = connection.cursor()
         cursor.execute("select database();")
         record = cursor.fetchone()
-        print("You're connected to datase: ", record)
+ #       print("You're connected to datase: ", record)
+        #find last DB entry and check if data is new (based on datetime). If not new, end.
         cursor.execute("SELECT currentDateTime FROM Production ORDER BY id DESC LIMIT 1;")
         latest = cursor.fetchone()
         lastTime = latest[0]
         checkTime = lastTime.strftime("%Y-%m-%d %H:%M:%S")
         if checkTime == readTime:
-            print("duplicate")
-            quit()
+           print("duplicate")
+           quit()
         else:
             mySql_insert_query = """INSERT INTO Production (currentDateTime, wnow) values (%s, %s)"""
             record = (readTime, wNow)
@@ -69,4 +70,3 @@ finally:
 #        print("MySQL connection is closed")
         
 quit()
-
