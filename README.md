@@ -11,8 +11,8 @@ The database the script is based on is set up as follows:
 
 Table name: Production
 
-Column 1: name id, type int(255), NO Null, Key PRI, Default NULL, Extra auto_increment
-Column 2: name currentDateTime, type datetime, NO null, Default NULL
+Column 1: name id, type int(255), NO Null, Key PRI, Default NULL, Extra auto_increment </br>
+Column 2: name currentDateTime, type datetime, NO null, Default NULL </br>
 Column 3: name wnow, type float, Null YES, Default NULL
 
 
