@@ -8,6 +8,7 @@ Please note at this stage the script doesnt set up your database.
 
 The database the script is based on is set up as follows:
 
+
 Table name: Production
 
 Column 1: name id, type int(255), NO Null, Key PRI, Default NULL, Extra auto_increment
